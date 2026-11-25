@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "minipath"
+version = "0.1.0"
+description = "A single-controller distributed dataflow runtime for JAX, built to study Google's Pathways design"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+dependencies = ["jax>=0.4.30", "numpy>=1.26", "cloudpickle>=3.0"]
+
+[project.optional-dependencies]
+experiments = ["matplotlib>=3.8"]
+dev = ["pytest>=8", "matplotlib>=3.8", "ruff>=0.5"]
+
+[tool.setuptools.packages.find]
+include = ["minipath*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+ignore = ["E501", "B023", "B905"]
