@@ -312,6 +312,10 @@ class Worker:
     def _op_run(self, epoch, op_id, prog_id, in_ids, consts, out_ids, notify) -> None:
         if epoch < self.epoch:
             return self._fail_outputs(out_ids, "aborted")
+        if prog_id not in self.programs:  # never hang on a protocol error
+            err = f"program {prog_id} was never compiled on worker {self.id}"
+            self.send_ctrl(("error", op_id, self.id, err))
+            return self._fail_outputs(out_ids, err)
         fn, name = self.programs[prog_id]
         try:
             args = [self.store.get(i, epoch) for i in in_ids]

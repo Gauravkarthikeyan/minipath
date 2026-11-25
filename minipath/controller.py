@@ -98,7 +98,6 @@ class Program:
         self.jit = jit
         self.n_out = n_out
         self.payload = cloudpickle.dumps(fn)
-        self.compiled_on: set = set()
 
 
 class Cluster:
@@ -133,6 +132,8 @@ class Cluster:
         self._send_locks = {w: threading.Lock() for w in range(self.n_total)}
         self._ids = itertools.count(1)
         self._garbage: deque = deque()
+        self._programs: dict = {}
+        self._compiled: set = set()
         self._pending: dict = {}
         self._done: dict = {}
         self._epoch = 0
@@ -181,6 +182,13 @@ class Cluster:
 
     def _send(self, w: int, msg) -> None:
         with self._send_locks[w]:
+            if msg[0] == "run" and (msg[3], w) not in self._compiled:
+                # Ship the program right before its first use on this worker,
+                # under the same per-connection lock. No other thread's op
+                # can then reach the worker between the compile and the run.
+                prog = self._programs[msg[3]]
+                self.conns[w].send(("compile", prog.id, prog.payload, prog.jit, prog.name))
+                self._compiled.add((msg[3], w))
             self.conns[w].send(msg)
 
     def _reader(self, w: int) -> None:
@@ -331,13 +339,10 @@ class Cluster:
         return self.rm.allocate(n, name)
 
     def compile(self, fn, *, name: str | None = None, jit: bool = True, n_out: int = 1) -> Program:
-        return Program(fn, name or getattr(fn, "__name__", "program"), jit, n_out)
-
-    def _ensure_compiled(self, prog: Program, workers: list, msgs: list) -> None:
-        for w in workers:
-            if w not in prog.compiled_on:
-                prog.compiled_on.add(w)
-                msgs.append((w, ("compile", prog.id, prog.payload, prog.jit, prog.name)))
+        """Register a function. Workers receive and jit it lazily, on first use."""
+        prog = Program(fn, name or getattr(fn, "__name__", "program"), jit, n_out)
+        self._programs[prog.id] = prog
+        return prog
 
     def put(self, value, slice_: Slice) -> Sharded:
         """Place host data on a slice. Pass a list to give each rank its own value."""
@@ -372,7 +377,6 @@ class Cluster:
         epoch = self._epoch
         op_id = next(self._ids)
         msgs: list = []
-        self._ensure_compiled(prog, workers, msgs)
         outs = [[] for _ in range(prog.n_out)]
         for r, w in enumerate(workers):
             keys = [next(self._ids) for _ in range(prog.n_out)]

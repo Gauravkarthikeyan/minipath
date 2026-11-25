@@ -317,6 +317,12 @@ version of this experiment showed almost no gain, because of a runtime bug
   function of (step, rank) and the ring all-reduce is bit-identical on every
   rank. So "did recovery work?" has an exact answer: the losses match a
   clean run to the last bit.
+* **CI finds the races your machine hides.** The first CI run failed a
+  test that passed every time locally. Two client threads could each decide
+  a program still needed to be shipped to a worker, and the second one's
+  `run` could then reach the worker before the first one's `compile`. On 4
+  cores it never happened. On the 2-core CI runner it did. The fix sends the
+  compile under the same per-connection lock as the first `run`.
 * **Localhost TCP lies to you.** The first sync benchmark ran at 23 steps/s
   because of Nagle's algorithm plus delayed ACKs. Unix sockets fixed it
   (~2,000 steps/s).
