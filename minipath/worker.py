@@ -10,7 +10,8 @@ forever.
 Threads in a worker:
 
 * control reader: receives messages from the controller. Most go into the
-  executor queue in order. ``abort`` and ``fetch`` are handled immediately.
+  executor queue in order. ``abort``, ``fetch`` and ``send`` are handled
+  immediately: a transfer waits on its source buffer, not on the stream.
 * peer acceptor and one reader per peer: receive tensors and collective
   chunks from other workers and write them straight into the store or the
   mailbox, so the controller never sits on the data path.
@@ -229,6 +230,13 @@ class Worker:
                     with self.mailbox.cv:
                         self.mailbox.cv.notify_all()
                     self.mailbox.clear()
+                elif kind == "send":
+                    # Transfers don't occupy the compute stream, like a DMA
+                    # engine next to a GPU/TPU core. on_ready fires the moment
+                    # the source buffer exists, even if compute queued behind it
+                    # is still waiting. Deletes still follow in stream order, and
+                    # this message arrives before any delete of the same buffer.
+                    self._op_send(*msg[1:])
                 elif kind == "fetch":
                     _, req, key = msg
                     self.store.on_ready(key, lambda v, req=req: self._reply_value(req, v))
@@ -440,4 +448,10 @@ def ring_allreduce(worker: Worker, x, group: list, tag, epoch: int, reduce: str)
 
 def worker_main(wid: int, ctrl_addr, authkey: bytes, env: dict) -> None:
     os.environ.update(env)
+    # Import heavy modules once, before any thread starts. Concurrent first
+    # imports from several threads can trip CPython's import-lock deadlock check.
+    import cloudpickle  # noqa: F401
+    import jax  # noqa: F401
+    import numpy  # noqa: F401
+
     Worker(wid, ctrl_addr, authkey).serve()

@@ -108,8 +108,8 @@ def measure(n_workers: int, n: int, n_iter: int, repeats: int) -> dict:
                     times.append(max(c.spmd(spmd_chain, s, (n_iter, n))))
                 else:
                     times.append(controller_chain(c, s, mode, n_iter, n))
-            best = min(times)
-            out[mode] = {"sec_per_step": best / n_iter, "steps_per_sec": n_iter / best, "all": times}
+            med = float(np.median(times))
+            out[mode] = {"sec_per_step": med / n_iter, "steps_per_sec": n_iter / med, "all": times}
     return out
 
 
@@ -117,7 +117,7 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--quick", action="store_true")
     args = ap.parse_args()
-    repeats = 2 if args.quick else 3
+    repeats = 2 if args.quick else 5
 
     part_a = []
     for nw in (1, 2, 4):
