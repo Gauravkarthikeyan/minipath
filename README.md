@@ -11,10 +11,13 @@ when a worker dies, re-plans the job onto a spare without restarting it.
 
 ![A worker is SIGKILLed mid-training. The single controller remaps it to a spare and keeps going; SPMD restarts from its last checkpoint.](docs/figures/e4_fault_tolerance.png)
 
-<sub>Left: a data-parallel transformer run on Tiny Shakespeare. Worker 2 is
-SIGKILLed after step 130. Right: the recovered run's loss curve matches a
-failure-free run bit for bit, until a second kill with no spare left forces
-an elastic shrink from 4 to 3 replicas.</sub>
+<sub>Data-parallel transformer training on Tiny Shakespeare, 4 replicas.
+Left: a worker is SIGKILLed after step 130, with both runs aligned on the
+kill. The single controller moves the lost virtual device to a hot spare
+and restores state from a survivor's memory. SPMD restarts from its last
+checkpoint. Right: the recovered run's losses match a failure-free run bit
+for bit, until a second kill with no spare left forces an elastic shrink
+from 4 to 3 replicas.</sub>
 
 ## Results
 
@@ -23,11 +26,11 @@ a 4-core CPU machine. Raw output is in [`results/`](results/).
 
 | Question | Result |
 |---|---|
-| **What does a single controller cost?** (E1) | On 4 workers, async dispatch runs trivial all-reduce chains at **E1_ASYNC4/s vs E1_SPMD4/s** for SPMD. A controller that waits on every op (RPC style) gets E1_SYNC4/s. Once an op does ≥ ~10 MFLOPs of work, the three are indistinguishable. |
-| **Why does it need a gang scheduler?** (E2) | Two clients sharing 4 workers deadlocked in **E2_UNSCHED of 20 trials** without one, and **0 of 20** with one. |
-| **Can one controller drive an MPMD pipeline?** (E3) | A 4-stage GPipe transformer matches single-device training to **E3_DIFF** in loss. The measured bubble tracks the (P−1)/(M+P−1) bound: E3_BUBBLE4 measured vs 43% theory at M=4. |
-| **What does a failure cost?** (E4) | Single controller with a hot spare: progress resumed **E4_SC_DOWN s** after the kill, with **E4_SC_REDO steps** redone. SPMD with checkpoint/restart: **E4_SP_DOWN s** and **E4_SP_REDO steps**. |
-| **Does overlapping RL sampling and training help?** (E5) | Moving one line of the controller's Python makes rollouts for step k+1 overlap the update for step k: **E5_SPEEDUP× faster** per iteration, and CartPole is solved in the same number of iterations. |
+| **What does a single controller cost?** (E1) | On 4 workers, async dispatch runs trivial all-reduce chains at **474/s vs 588/s** for SPMD (on 2 workers: 1,756 vs 1,699). A controller that waits on every op (RPC style) gets 408/s. With real compute per op, async stays within ~10% of SPMD at every size tested. At 2 GFLOPs per op, it is 27.4 ms vs 27.5 ms. |
+| **Why does it need a gang scheduler?** (E2) | Two clients sharing 4 workers deadlocked in **20 of 20 trials** without one, and **0 of 20** with one. |
+| **Can one controller drive an MPMD pipeline?** (E3) | A 4-stage GPipe transformer matches single-device training to **3 × 10⁻⁷** in loss. The measured bubble matches the (P−1)/(M+P−1) bound: **43% measured vs 43% theory** at M=4. |
+| **What does a failure cost?** (E4) | Single controller with a hot spare: new progress **2.8 s** after the kill, **2 steps** redone, and the losses are **bit-identical** to a run with no failure. SPMD with checkpoint/restart: **24.2 s** and **31 steps** redone. |
+| **Does overlapping RL sampling and training help?** (E5) | Moving one line of the controller's Python makes rollouts for step k+1 overlap the update for step k: **1.48× faster** per iteration (62.7 → 42.5 ms), and CartPole is solved in about the same number of iterations (32–35 vs 30–34). |
 
 ## Why this exists
 
@@ -98,27 +101,32 @@ and lists what is deliberately left out.
 
 ### The API in one example
 
+From [`examples/quickstart.py`](examples/quickstart.py), which trains the
+char transformer data-parallel on 4 workers (`python examples/quickstart.py`,
+about 2 minutes on 4 CPU cores):
+
 ```python
-import numpy as np
-from minipath import Cluster
+with Cluster(4) as cluster:
+    dp = cluster.allocate(4)                                  # 4 virtual devices
+    batch = cluster.compile(T.make_batcher(cfg), n_out=2)     # plain JAX functions
+    lg = cluster.compile(progs["loss_and_grad"], n_out=2)
+    adam = cluster.compile(progs["adam"], n_out=4)
 
-def loss_and_grad(params, x, y): ...   # any jittable JAX function
-def adam(params, m, v, g, t): ...
+    data = cluster.put(tokens, dp)            # replicated once; batches are sampled on-device
+    p, m, v, t = (cluster.put(x, dp) for x in (params, zeros, zeros, np.float32(0)))
 
-with Cluster(4, n_spares=1) as cluster:        # 4 workers + 1 hot spare
-    dp = cluster.allocate(4)                   # a slice of virtual devices
-    lg = cluster.compile(loss_and_grad, n_out=2)
-    opt = cluster.compile(adam, n_out=4)
-    p, m, v, t = (cluster.put(a, dp) for a in (params, zeros, zeros, np.float32(0)))
-
-    for step in range(1000):                   # this loop never waits on compute
-        x, y = next_batch(step)                # (in the experiments, batches are made on-device)
+    for step in range(200):
+        ranks = [(np.int32(step), np.int32(r)) for r in range(4)]
+        x, y = cluster.run(batch, dp, data, consts=ranks)
         loss, g = cluster.run(lg, dp, p, x, y)
-        g = cluster.allreduce(g)               # ring all-reduce, gang-scheduled
-        p, m, v, t = cluster.run(opt, dp, p, m, v, g, t)
-
-    print(loss.fetch(0))                       # the only place the controller blocks
+        g = cluster.allreduce(g)              # ring all-reduce, gang-scheduled
+        p, m, v, t = cluster.run(adam, dp, p, m, v, g, t)
+        if step % 25 == 0:
+            print(f"step {step:3d}  loss {float(loss.fetch(0)):.3f}")   # the only blocking call
 ```
+
+Every `run` / `allreduce` returns futures right away, so the loop runs
+ahead of the workers and the only synchronization is `fetch`.
 
 ## Experiments
 
@@ -138,7 +146,20 @@ single controller that dispatches ahead on futures.
 
 ![E1](docs/figures/e1_dispatch.png)
 
-E1_TEXT
+With trivial compute, the gap is pure overhead. On one worker, SPMD runs
+50,509 computations/s because it sends no messages at all. The controller
+pays about 120 µs of Python and IPC per computation (two ops). Once there is
+a real collective, the all-reduce's own latency dominates, and async
+dispatch lands at **103% of SPMD on 2 workers and 81% on 4**. A controller
+that waits on every op is 1.2–5.5× slower than the async one, because every
+op costs a full round trip.
+
+The right panel adds real compute. Async tracks SPMD at every size: the
+gap is 0–13%, and at n = 1024 (2 GFLOPs) it is 27.4 ms vs 27.5 ms. The
+synchronous controller pays a round trip on every computation. That is
++50–65% on small ops, shrinking to about +9% at 2 GFLOPs.
+This is the Pathways argument in one plot: dispatch overhead is a latency
+cost, and futures hide it as long as there is work to overlap with.
 
 ### E2. Why a central gang scheduler
 
@@ -150,7 +171,13 @@ detected by a 2 s stall timeout, so they are measured, not assumed.
 
 ![E2](docs/figures/e2_gang.png)
 
-E2_TEXT
+Without a scheduler, all 20 trials deadlocked in *both* variants. That
+includes the one where each client always sends to workers in the same rank
+order, so the only nondeterminism left is how two Python threads
+interleave. With that fixed order, the deadlock probability climbs from 15%
+when each client issues a single all-reduce to 85% at 16. With the gang
+scheduler, 0 of 20 trials deadlocked, and both clients' results were checked
+for numerical correctness every time.
 
 ### E3. An MPMD pipeline from a Python loop
 
@@ -165,7 +192,24 @@ though each runs a different program.
 
 ![E3](docs/figures/e3_pipeline.png)
 
-E3_TEXT
+Training is the same math, to float32 rounding: after 150 steps both curves
+read 2.2495, with a max per-step difference of 3 × 10⁻⁷. The timeline is a
+real trace from the workers. Forward ops ripple down the stages, the last
+stage fuses loss and backward, and gradients ripple back up. Nothing in the
+controller code says "wait for stage 2". The schedule falls out of futures
+plus in-order streams.
+
+| micro-batches M | 1 | 2 | 4 | 8 | 16 |
+|---|---|---|---|---|---|
+| bubble, theory (P−1)/(M+P−1) | 75% | 60% | 43% | 27% | 16% |
+| bubble, measured | 76% | 61% | 43% | 34% | 32% |
+| speedup vs. 1 worker (232 ms/step) | 1.57× | 2.02× | 1.96× | 1.77× | 1.52× |
+
+Up to M = 4 the measured bubble is the textbook number. Past that, the
+micro-batches get tiny (2 sequences at M = 16), and fixed per-op costs
+(dispatch, a transfer, a jitted call) stop being negligible. The best
+end-to-end speedup is ~2× on 4 workers. Backward costs ~3× forward here
+(it recomputes the forward), and the stages aren't perfectly balanced.
 
 ### E4. Killing a worker mid-training
 
@@ -186,7 +230,45 @@ replicas, global batch 128 × 64 characters, 400 steps. A worker is
   kill after step 280 finds no spare, so the job shrinks to 3 replicas and
   keeps going.
 
-E4_TEXT
+| | single controller | SPMD + checkpoints |
+|---|---|---|
+| failure detected | 48 ms | 31 ms |
+| re-plan (remap + choose restore point) | 8 ms | n/a |
+| time until a *new* step completes | **2.8 s** | **24.2 s** |
+| steps executed twice (whole run) | **2** | **31** |
+| end-to-end vs. its own clean run | see note | +40 s (+18%) |
+| second kill, no spares left | shrinks to 3 replicas, new steps after 0.86 s | n/a |
+
+The single controller loses almost nothing. It resumes from the newest
+optimizer state still in a survivor's memory, which is two steps behind
+because the controller runs two steps ahead. The 2.8 s is the
+spare compiling its programs for the first time, plus re-running those two
+steps. SPMD's relaunch was fast here: 0.9 s for 4 fresh processes on a
+machine with warm caches. Its real cost is the 31 steps since the step-100
+checkpoint. With a checkpoint every N
+steps, the expected redo is N/2.
+
+Recovery is exact. Batches depend only on (step, rank), and the ring
+all-reduce gives every rank bit-identical results. So the recovered run's
+losses equal the clean run's **bit for bit** for all 280 steps before the
+elastic shrink. After the shrink, the global batch is 96 instead of 128 and
+the curves diverge slightly (held-out loss 1.762 vs 1.747).
+
+Note: the single-controller run with failures finished *faster* than its
+clean run (224 s vs 235 s). That's because the last 120 steps used 3
+replicas and a smaller global batch, so the end-to-end numbers aren't
+comparable. The clean runs show the price of a controller here: 235 s vs
+222 s for SPMD (6%), with 4 workers and the controller sharing 4 cores.
+
+A sample from the clean run's final model (0.8M params, 400 steps, 4 minutes on CPU):
+
+```
+ROMEO:
+Where, welcome is dozen'd the hearth only
+That Lorden Which the most make but the grom two thee;
+And thy march, forbusir'd from Police,
+The pence being the king, but his charge,
+```
 
 ### E5. RL with overlapping sampler and learner
 
@@ -201,7 +283,19 @@ two overlap and the policy lags by one step.
 
 ![E5](docs/figures/e5_rl_overlap.png)
 
-E5_TEXT
+| | sync | async (lag 1) |
+|---|---|---|
+| ms / iteration (mean of 3 seeds) | 62.7 | **42.5** |
+| env steps / s | 1.63 M | **2.41 M** |
+| sampler / learner busy | 37% / 42% | 69% / 83% |
+| iterations to mean return ≥ 195 | 30, 33, 34 | 32, 34, 35 |
+| wall-clock to mean return ≥ 195 | 1.72–1.93 s | **1.25–1.27 s** |
+
+Overlap buys 1.48× throughput. The one-step policy lag costs about one
+iteration of sample efficiency. A synchronous schedule leaves each slice
+idle while the other works, and the async one fills those gaps. The first
+version of this experiment showed almost no gain, because of a runtime bug
+(see "What I learned").
 
 ## What I learned building it
 
@@ -217,8 +311,8 @@ E5_TEXT
   `send` ops in the source worker's stream. In E5, the batch for step k then
   waited behind the rollout for step k+1, which was itself waiting for new
   weights, and the "async" schedule ran at sync speed. Moving transfers
-  beside the stream, the way DMA engines sit beside compute, took the
-  iteration from 66 ms to 47 ms.
+  beside the stream, the way DMA engines sit beside compute, took the async
+  iteration from 61 ms to 47 ms in a smoke run, against 66 ms for sync.
 * **Determinism turns recovery into a correctness test.** Batches are a
   function of (step, rank) and the ring all-reduce is bit-identical on every
   rank. So "did recovery work?" has an exact answer: the losses match a
@@ -245,7 +339,7 @@ numbers with these in mind:
   the same machine**, which makes it look better than a real job (NCCL
   timeouts, rescheduling, image pulls). On the other side, torchrun-style
   elastic agents can also use hot spares. The gap here comes mostly from
-  re-doing steps since the last checkpoint and from cold-starting processes.
+  re-doing the steps since the last checkpoint.
 * **The controller is a single point of failure**, as it is in Pathways.
 * **E5's utilization numbers are inflated** when all four workers and the
   controller compete for four cores, because ops simply take longer.
@@ -257,7 +351,7 @@ numbers with these in mind:
 | PyTorch DDP / FSDP, multi-controller JAX | multi-controller SPMD | Every process runs the same program. Failures mean restart from a checkpoint (torchrun elastic can re-rendezvous). |
 | [Pathways](https://arxiv.org/abs/2203.12533) (Google) | single controller over compiled SPMD blocks, gang-scheduled per island | Reports ~100% accelerator utilization for SPMD on 2048 TPUs, and SPMD-level throughput for 16-stage pipelines. Generally available on Google Cloud as of 2026. |
 | [Ray](https://www.ray.io/) | single driver over tasks and actors | The Pathways blog puts it well: Ray's job is orchestration, Pathways' job is execution. The training *inside* a Ray worker group is still SPMD. |
-| [PyTorch Monarch](https://pytorch.org/blog/introducing-pytorch-monarch/) (Meta) | single controller over process/actor meshes, Rust backend | The closest open-source analogue in the PyTorch world. It fails fast by default and lets you handle failures in Python. |
+| [PyTorch Monarch](https://pytorch.org/blog/introducing-pytorch-monarch/) (Meta) | single controller over process/actor meshes, Rust backend | The closest open-source analogue in the PyTorch world. It fails fast by default, like an uncaught exception in a local script. |
 | [verl / HybridFlow](https://arxiv.org/abs/2409.19256) (ByteDance) | hybrid: single controller *between* models, multi-controller *within* each | Built for RLHF. Reports 1.53–20.57× throughput over prior RLHF systems. E5 is a tiny version of this split. |
 | **minipath** | single controller over per-worker jitted programs | ~1,100 lines, for reading and measuring. |
 
@@ -267,6 +361,7 @@ numbers with these in mind:
 git clone https://github.com/Gauravkarthikeyan/rl-poster && cd rl-poster
 pip install -e ".[dev]"          # jax, numpy, cloudpickle, matplotlib, pytest
 pytest -q                        # 20 tests, ~40 s
+python examples/quickstart.py    # train on Tiny Shakespeare with 4 workers, ~2 min
 make quick                       # every experiment at smoke size, ~8 min
 make experiments                 # full runs + figures, ~50 min
 ```
@@ -285,6 +380,7 @@ minipath/
     transformer.py   char-level transformer in plain JAX, splittable into stages
     shakespeare.py   dataset download + checksum
     cartpole.py      CartPole dynamics + REINFORCE in JAX
+examples/            quickstart.py: the API on a real workload
 experiments/         E1–E5 and plots.py (every figure is generated from results/*.json)
 tests/               runtime semantics + workload correctness (pipeline == 1 device,
                      recovery == clean run, physics == closed form)

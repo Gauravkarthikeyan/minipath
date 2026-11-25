@@ -129,9 +129,13 @@ def single_device_run(c: Cluster, cfg: T.Config, n_micro: int, tokens, steps: in
 
 
 def bubble_from_trace(events: dict, t_start: float, t_end: float) -> dict:
+    # Only compute counts as busy. A collective's duration is mostly waiting
+    # for the slowest rank, which is exactly the idle time being measured.
     busy = {}
     for w, evs in events.items():
-        b = sum(min(e[3], t_end) - max(e[2], t_start) for e in evs if e[3] > t_start and e[2] < t_end)
+        b = sum(
+            min(e[3], t_end) - max(e[2], t_start) for e in evs if e[1] == "compute" and e[3] > t_start and e[2] < t_end
+        )
         busy[w] = b
     span = t_end - t_start
     util = float(np.mean([b / span for b in busy.values()]))
@@ -197,6 +201,7 @@ def main() -> None:
                 "bubble_measured": b["bubble"],
                 "bubble_theory": theory,
                 "per_worker_util": b["per_worker_util"],
+                "stage_workers": [c.rm.physical(st.vdevs[0]) for st in pipe.stages],
             }
             if M in (4, 8):  # keep one step of trace for the timeline figure
                 last_step = [(w, e) for w, evs in tr.items() for e in evs]

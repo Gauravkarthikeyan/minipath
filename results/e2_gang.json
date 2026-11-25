@@ -4,7 +4,7 @@
     "cores": 4,
     "python": "3.13.18",
     "jax": "0.12.1",
-    "commit": "unknown"
+    "commit": "fb4c8f2"
   },
   "n_trials": 20,
   "ops_per_client": 50,
@@ -19,7 +19,7 @@
         {
           "deadlock": true,
           "correct": false,
-          "seconds": 4.056918150999991,
+          "seconds": 4.054111654999815,
           "result": {
             "B": [
               "stalled",
@@ -34,37 +34,7 @@
         {
           "deadlock": true,
           "correct": false,
-          "seconds": 4.064672632000111,
-          "result": {
-            "A": [
-              "stalled",
-              "RemoteOpError"
-            ],
-            "B": [
-              "stalled",
-              "RemoteOpError"
-            ]
-          }
-        },
-        {
-          "deadlock": true,
-          "correct": false,
-          "seconds": 4.040910966999945,
-          "result": {
-            "A": [
-              "stalled",
-              "RemoteOpError"
-            ],
-            "B": [
-              "stalled",
-              "RemoteOpError"
-            ]
-          }
-        },
-        {
-          "deadlock": true,
-          "correct": false,
-          "seconds": 6.061313858999938,
+          "seconds": 4.032041685999957,
           "result": {
             "B": [
               "stalled",
@@ -79,22 +49,7 @@
         {
           "deadlock": true,
           "correct": false,
-          "seconds": 4.0351000400000885,
-          "result": {
-            "B": [
-              "stalled",
-              "RemoteOpError"
-            ],
-            "A": [
-              "stalled",
-              "RemoteOpError"
-            ]
-          }
-        },
-        {
-          "deadlock": true,
-          "correct": false,
-          "seconds": 4.053700991999904,
+          "seconds": 4.034612337999988,
           "result": {
             "A": [
               "stalled",
@@ -109,37 +64,7 @@
         {
           "deadlock": true,
           "correct": false,
-          "seconds": 4.036634704000107,
-          "result": {
-            "A": [
-              "stalled",
-              "RemoteOpError"
-            ],
-            "B": [
-              "stalled",
-              "RemoteOpError"
-            ]
-          }
-        },
-        {
-          "deadlock": true,
-          "correct": false,
-          "seconds": 4.028089909000073,
-          "result": {
-            "A": [
-              "stalled",
-              "RemoteOpError"
-            ],
-            "B": [
-              "stalled",
-              "RemoteOpError"
-            ]
-          }
-        },
-        {
-          "deadlock": true,
-          "correct": false,
-          "seconds": 4.051390554000136,
+          "seconds": 4.04434236599991,
           "result": {
             "B": [
               "stalled",
@@ -154,22 +79,7 @@
         {
           "deadlock": true,
           "correct": false,
-          "seconds": 4.035286971999994,
-          "result": {
-            "A": [
-              "stalled",
-              "RemoteOpError"
-            ],
-            "B": [
-              "stalled",
-              "RemoteOpError"
-            ]
-          }
-        },
-        {
-          "deadlock": true,
-          "correct": false,
-          "seconds": 4.027251841000179,
+          "seconds": 4.031029441999635,
           "result": {
             "B": [
               "stalled",
@@ -184,22 +94,7 @@
         {
           "deadlock": true,
           "correct": false,
-          "seconds": 4.028822300999991,
-          "result": {
-            "A": [
-              "stalled",
-              "RemoteOpError"
-            ],
-            "B": [
-              "stalled",
-              "RemoteOpError"
-            ]
-          }
-        },
-        {
-          "deadlock": true,
-          "correct": false,
-          "seconds": 4.043327238000074,
+          "seconds": 4.031563440999889,
           "result": {
             "B": [
               "stalled",
@@ -214,7 +109,7 @@
         {
           "deadlock": true,
           "correct": false,
-          "seconds": 4.029448384000034,
+          "seconds": 4.04161801500004,
           "result": {
             "B": [
               "stalled",
@@ -229,22 +124,7 @@
         {
           "deadlock": true,
           "correct": false,
-          "seconds": 4.0358809099998325,
-          "result": {
-            "B": [
-              "stalled",
-              "RemoteOpError"
-            ],
-            "A": [
-              "stalled",
-              "RemoteOpError"
-            ]
-          }
-        },
-        {
-          "deadlock": true,
-          "correct": false,
-          "seconds": 4.034638328000028,
+          "seconds": 4.04693627100005,
           "result": {
             "A": [
               "stalled",
@@ -259,7 +139,7 @@
         {
           "deadlock": true,
           "correct": false,
-          "seconds": 4.035158302000127,
+          "seconds": 4.050661795999986,
           "result": {
             "B": [
               "stalled",
@@ -274,7 +154,7 @@
         {
           "deadlock": true,
           "correct": false,
-          "seconds": 4.029129946000012,
+          "seconds": 4.029998990999957,
           "result": {
             "A": [
               "stalled",
@@ -289,7 +169,7 @@
         {
           "deadlock": true,
           "correct": false,
-          "seconds": 4.0265416820000155,
+          "seconds": 4.063047321999875,
           "result": {
             "A": [
               "stalled",
@@ -304,13 +184,133 @@
         {
           "deadlock": true,
           "correct": false,
-          "seconds": 4.032725923000044,
+          "seconds": 4.03219222000007,
+          "result": {
+            "B": [
+              "stalled",
+              "RemoteOpError"
+            ],
+            "A": [
+              "stalled",
+              "RemoteOpError"
+            ]
+          }
+        },
+        {
+          "deadlock": true,
+          "correct": false,
+          "seconds": 4.031518292000328,
           "result": {
             "A": [
               "stalled",
               "RemoteOpError"
             ],
             "B": [
+              "stalled",
+              "RemoteOpError"
+            ]
+          }
+        },
+        {
+          "deadlock": true,
+          "correct": false,
+          "seconds": 4.039076828999896,
+          "result": {
+            "B": [
+              "stalled",
+              "RemoteOpError"
+            ],
+            "A": [
+              "stalled",
+              "RemoteOpError"
+            ]
+          }
+        },
+        {
+          "deadlock": true,
+          "correct": false,
+          "seconds": 4.028793186999792,
+          "result": {
+            "B": [
+              "stalled",
+              "RemoteOpError"
+            ],
+            "A": [
+              "stalled",
+              "RemoteOpError"
+            ]
+          }
+        },
+        {
+          "deadlock": true,
+          "correct": false,
+          "seconds": 4.040058926000711,
+          "result": {
+            "B": [
+              "stalled",
+              "RemoteOpError"
+            ],
+            "A": [
+              "stalled",
+              "RemoteOpError"
+            ]
+          }
+        },
+        {
+          "deadlock": true,
+          "correct": false,
+          "seconds": 4.032340378999834,
+          "result": {
+            "A": [
+              "stalled",
+              "RemoteOpError"
+            ],
+            "B": [
+              "stalled",
+              "RemoteOpError"
+            ]
+          }
+        },
+        {
+          "deadlock": true,
+          "correct": false,
+          "seconds": 4.0369629879996864,
+          "result": {
+            "B": [
+              "stalled",
+              "RemoteOpError"
+            ],
+            "A": [
+              "stalled",
+              "RemoteOpError"
+            ]
+          }
+        },
+        {
+          "deadlock": true,
+          "correct": false,
+          "seconds": 4.033080166999753,
+          "result": {
+            "B": [
+              "stalled",
+              "RemoteOpError"
+            ],
+            "A": [
+              "stalled",
+              "RemoteOpError"
+            ]
+          }
+        },
+        {
+          "deadlock": true,
+          "correct": false,
+          "seconds": 4.04294684100023,
+          "result": {
+            "B": [
+              "stalled",
+              "RemoteOpError"
+            ],
+            "A": [
               "stalled",
               "RemoteOpError"
             ]
@@ -327,67 +327,7 @@
         {
           "deadlock": true,
           "correct": false,
-          "seconds": 4.03844408100008,
-          "result": {
-            "A": [
-              "stalled",
-              "RemoteOpError"
-            ],
-            "B": [
-              "stalled",
-              "RemoteOpError"
-            ]
-          }
-        },
-        {
-          "deadlock": true,
-          "correct": false,
-          "seconds": 4.177846971000008,
-          "result": {
-            "A": [
-              "stalled",
-              "RemoteOpError"
-            ],
-            "B": [
-              "stalled",
-              "RemoteOpError"
-            ]
-          }
-        },
-        {
-          "deadlock": true,
-          "correct": false,
-          "seconds": 4.072467585999902,
-          "result": {
-            "A": [
-              "stalled",
-              "RemoteOpError"
-            ],
-            "B": [
-              "stalled",
-              "RemoteOpError"
-            ]
-          }
-        },
-        {
-          "deadlock": true,
-          "correct": false,
-          "seconds": 4.050719942000114,
-          "result": {
-            "A": [
-              "stalled",
-              "RemoteOpError"
-            ],
-            "B": [
-              "stalled",
-              "RemoteOpError"
-            ]
-          }
-        },
-        {
-          "deadlock": true,
-          "correct": false,
-          "seconds": 4.058768579999878,
+          "seconds": 4.030612520000432,
           "result": {
             "B": [
               "stalled",
@@ -402,7 +342,7 @@
         {
           "deadlock": true,
           "correct": false,
-          "seconds": 4.051280160000033,
+          "seconds": 6.051688525999452,
           "result": {
             "A": [
               "stalled",
@@ -417,52 +357,7 @@
         {
           "deadlock": true,
           "correct": false,
-          "seconds": 4.174412295000138,
-          "result": {
-            "B": [
-              "stalled",
-              "RemoteOpError"
-            ],
-            "A": [
-              "stalled",
-              "RemoteOpError"
-            ]
-          }
-        },
-        {
-          "deadlock": true,
-          "correct": false,
-          "seconds": 4.032927670000163,
-          "result": {
-            "B": [
-              "stalled",
-              "RemoteOpError"
-            ],
-            "A": [
-              "stalled",
-              "RemoteOpError"
-            ]
-          }
-        },
-        {
-          "deadlock": true,
-          "correct": false,
-          "seconds": 6.0930041359999905,
-          "result": {
-            "B": [
-              "stalled",
-              "RemoteOpError"
-            ],
-            "A": [
-              "stalled",
-              "RemoteOpError"
-            ]
-          }
-        },
-        {
-          "deadlock": true,
-          "correct": false,
-          "seconds": 6.048039348999964,
+          "seconds": 4.036235020999811,
           "result": {
             "A": [
               "stalled",
@@ -477,97 +372,7 @@
         {
           "deadlock": true,
           "correct": false,
-          "seconds": 4.107332733000021,
-          "result": {
-            "A": [
-              "stalled",
-              "RemoteOpError"
-            ],
-            "B": [
-              "stalled",
-              "RemoteOpError"
-            ]
-          }
-        },
-        {
-          "deadlock": true,
-          "correct": false,
-          "seconds": 4.037539815999935,
-          "result": {
-            "A": [
-              "stalled",
-              "RemoteOpError"
-            ],
-            "B": [
-              "stalled",
-              "RemoteOpError"
-            ]
-          }
-        },
-        {
-          "deadlock": true,
-          "correct": false,
-          "seconds": 4.028341248000061,
-          "result": {
-            "A": [
-              "stalled",
-              "RemoteOpError"
-            ],
-            "B": [
-              "stalled",
-              "RemoteOpError"
-            ]
-          }
-        },
-        {
-          "deadlock": true,
-          "correct": false,
-          "seconds": 4.055708071000026,
-          "result": {
-            "A": [
-              "stalled",
-              "RemoteOpError"
-            ],
-            "B": [
-              "stalled",
-              "RemoteOpError"
-            ]
-          }
-        },
-        {
-          "deadlock": true,
-          "correct": false,
-          "seconds": 4.033110130000068,
-          "result": {
-            "A": [
-              "stalled",
-              "RemoteOpError"
-            ],
-            "B": [
-              "stalled",
-              "RemoteOpError"
-            ]
-          }
-        },
-        {
-          "deadlock": true,
-          "correct": false,
-          "seconds": 4.035476602000017,
-          "result": {
-            "A": [
-              "stalled",
-              "RemoteOpError"
-            ],
-            "B": [
-              "stalled",
-              "RemoteOpError"
-            ]
-          }
-        },
-        {
-          "deadlock": true,
-          "correct": false,
-          "seconds": 4.075601421999863,
+          "seconds": 4.081846172000041,
           "result": {
             "B": [
               "stalled",
@@ -582,22 +387,7 @@
         {
           "deadlock": true,
           "correct": false,
-          "seconds": 4.082370668000067,
-          "result": {
-            "A": [
-              "stalled",
-              "RemoteOpError"
-            ],
-            "B": [
-              "stalled",
-              "RemoteOpError"
-            ]
-          }
-        },
-        {
-          "deadlock": true,
-          "correct": false,
-          "seconds": 4.041740336999965,
+          "seconds": 4.072176493999905,
           "result": {
             "B": [
               "stalled",
@@ -612,13 +402,223 @@
         {
           "deadlock": true,
           "correct": false,
-          "seconds": 4.044243714999993,
+          "seconds": 4.064367475000836,
           "result": {
             "B": [
               "stalled",
               "RemoteOpError"
             ],
             "A": [
+              "stalled",
+              "RemoteOpError"
+            ]
+          }
+        },
+        {
+          "deadlock": true,
+          "correct": false,
+          "seconds": 4.04277863400057,
+          "result": {
+            "B": [
+              "stalled",
+              "RemoteOpError"
+            ],
+            "A": [
+              "stalled",
+              "RemoteOpError"
+            ]
+          }
+        },
+        {
+          "deadlock": true,
+          "correct": false,
+          "seconds": 4.094153111000196,
+          "result": {
+            "B": [
+              "stalled",
+              "RemoteOpError"
+            ],
+            "A": [
+              "stalled",
+              "RemoteOpError"
+            ]
+          }
+        },
+        {
+          "deadlock": true,
+          "correct": false,
+          "seconds": 4.061419575999935,
+          "result": {
+            "B": [
+              "stalled",
+              "RemoteOpError"
+            ],
+            "A": [
+              "stalled",
+              "RemoteOpError"
+            ]
+          }
+        },
+        {
+          "deadlock": true,
+          "correct": false,
+          "seconds": 4.031742543000291,
+          "result": {
+            "B": [
+              "stalled",
+              "RemoteOpError"
+            ],
+            "A": [
+              "stalled",
+              "RemoteOpError"
+            ]
+          }
+        },
+        {
+          "deadlock": true,
+          "correct": false,
+          "seconds": 4.044454244000008,
+          "result": {
+            "A": [
+              "stalled",
+              "RemoteOpError"
+            ],
+            "B": [
+              "stalled",
+              "RemoteOpError"
+            ]
+          }
+        },
+        {
+          "deadlock": true,
+          "correct": false,
+          "seconds": 4.045370994000223,
+          "result": {
+            "B": [
+              "stalled",
+              "RemoteOpError"
+            ],
+            "A": [
+              "stalled",
+              "RemoteOpError"
+            ]
+          }
+        },
+        {
+          "deadlock": true,
+          "correct": false,
+          "seconds": 4.110720250999293,
+          "result": {
+            "B": [
+              "stalled",
+              "RemoteOpError"
+            ],
+            "A": [
+              "stalled",
+              "RemoteOpError"
+            ]
+          }
+        },
+        {
+          "deadlock": true,
+          "correct": false,
+          "seconds": 4.071700206999594,
+          "result": {
+            "B": [
+              "stalled",
+              "RemoteOpError"
+            ],
+            "A": [
+              "stalled",
+              "RemoteOpError"
+            ]
+          }
+        },
+        {
+          "deadlock": true,
+          "correct": false,
+          "seconds": 4.046508942000401,
+          "result": {
+            "A": [
+              "stalled",
+              "RemoteOpError"
+            ],
+            "B": [
+              "stalled",
+              "RemoteOpError"
+            ]
+          }
+        },
+        {
+          "deadlock": true,
+          "correct": false,
+          "seconds": 4.039276248000533,
+          "result": {
+            "A": [
+              "stalled",
+              "RemoteOpError"
+            ],
+            "B": [
+              "stalled",
+              "RemoteOpError"
+            ]
+          }
+        },
+        {
+          "deadlock": true,
+          "correct": false,
+          "seconds": 4.089797806000206,
+          "result": {
+            "B": [
+              "stalled",
+              "RemoteOpError"
+            ],
+            "A": [
+              "stalled",
+              "RemoteOpError"
+            ]
+          }
+        },
+        {
+          "deadlock": true,
+          "correct": false,
+          "seconds": 4.043579065999438,
+          "result": {
+            "A": [
+              "stalled",
+              "RemoteOpError"
+            ],
+            "B": [
+              "stalled",
+              "RemoteOpError"
+            ]
+          }
+        },
+        {
+          "deadlock": true,
+          "correct": false,
+          "seconds": 4.034688424000706,
+          "result": {
+            "A": [
+              "stalled",
+              "RemoteOpError"
+            ],
+            "B": [
+              "stalled",
+              "RemoteOpError"
+            ]
+          }
+        },
+        {
+          "deadlock": true,
+          "correct": false,
+          "seconds": 4.124632167000527,
+          "result": {
+            "A": [
+              "stalled",
+              "RemoteOpError"
+            ],
+            "B": [
               "stalled",
               "RemoteOpError"
             ]
@@ -630,27 +630,12 @@
       "deadlocks": 0,
       "deadlock_rate": 0.0,
       "all_results_correct": true,
-      "median_seconds_when_ok": 0.2001880259998643,
+      "median_seconds_when_ok": 0.20743811299962545,
       "trials": [
         {
           "deadlock": false,
           "correct": true,
-          "seconds": 0.17582699199988383,
-          "result": {
-            "B": [
-              "ok",
-              50.0
-            ],
-            "A": [
-              "ok",
-              50.0
-            ]
-          }
-        },
-        {
-          "deadlock": false,
-          "correct": true,
-          "seconds": 0.2052408510000987,
+          "seconds": 0.19254531800015684,
           "result": {
             "A": [
               "ok",
@@ -665,97 +650,7 @@
         {
           "deadlock": false,
           "correct": true,
-          "seconds": 0.1854642480000166,
-          "result": {
-            "A": [
-              "ok",
-              50.0
-            ],
-            "B": [
-              "ok",
-              50.0
-            ]
-          }
-        },
-        {
-          "deadlock": false,
-          "correct": true,
-          "seconds": 0.2197144900001149,
-          "result": {
-            "A": [
-              "ok",
-              50.0
-            ],
-            "B": [
-              "ok",
-              50.0
-            ]
-          }
-        },
-        {
-          "deadlock": false,
-          "correct": true,
-          "seconds": 0.19920595199982927,
-          "result": {
-            "A": [
-              "ok",
-              50.0
-            ],
-            "B": [
-              "ok",
-              50.0
-            ]
-          }
-        },
-        {
-          "deadlock": false,
-          "correct": true,
-          "seconds": 0.18169357700003275,
-          "result": {
-            "A": [
-              "ok",
-              50.0
-            ],
-            "B": [
-              "ok",
-              50.0
-            ]
-          }
-        },
-        {
-          "deadlock": false,
-          "correct": true,
-          "seconds": 0.18475046499997916,
-          "result": {
-            "A": [
-              "ok",
-              50.0
-            ],
-            "B": [
-              "ok",
-              50.0
-            ]
-          }
-        },
-        {
-          "deadlock": false,
-          "correct": true,
-          "seconds": 0.20117009999989932,
-          "result": {
-            "A": [
-              "ok",
-              50.0
-            ],
-            "B": [
-              "ok",
-              50.0
-            ]
-          }
-        },
-        {
-          "deadlock": false,
-          "correct": true,
-          "seconds": 0.20172562100015057,
+          "seconds": 0.24067943600039143,
           "result": {
             "B": [
               "ok",
@@ -770,22 +665,7 @@
         {
           "deadlock": false,
           "correct": true,
-          "seconds": 0.20412716200007708,
-          "result": {
-            "A": [
-              "ok",
-              50.0
-            ],
-            "B": [
-              "ok",
-              50.0
-            ]
-          }
-        },
-        {
-          "deadlock": false,
-          "correct": true,
-          "seconds": 0.20974524900020697,
+          "seconds": 0.2358511410002393,
           "result": {
             "B": [
               "ok",
@@ -800,22 +680,7 @@
         {
           "deadlock": false,
           "correct": true,
-          "seconds": 0.21061936400019476,
-          "result": {
-            "B": [
-              "ok",
-              50.0
-            ],
-            "A": [
-              "ok",
-              50.0
-            ]
-          }
-        },
-        {
-          "deadlock": false,
-          "correct": true,
-          "seconds": 0.1913630619999367,
+          "seconds": 0.22657595700002275,
           "result": {
             "A": [
               "ok",
@@ -830,22 +695,7 @@
         {
           "deadlock": false,
           "correct": true,
-          "seconds": 0.18044790899989493,
-          "result": {
-            "B": [
-              "ok",
-              50.0
-            ],
-            "A": [
-              "ok",
-              50.0
-            ]
-          }
-        },
-        {
-          "deadlock": false,
-          "correct": true,
-          "seconds": 0.204694715000187,
+          "seconds": 0.2295257230007337,
           "result": {
             "A": [
               "ok",
@@ -860,7 +710,7 @@
         {
           "deadlock": false,
           "correct": true,
-          "seconds": 0.16513667399999576,
+          "seconds": 0.17912917499961623,
           "result": {
             "B": [
               "ok",
@@ -875,22 +725,7 @@
         {
           "deadlock": false,
           "correct": true,
-          "seconds": 0.20724398900006236,
-          "result": {
-            "A": [
-              "ok",
-              50.0
-            ],
-            "B": [
-              "ok",
-              50.0
-            ]
-          }
-        },
-        {
-          "deadlock": false,
-          "correct": true,
-          "seconds": 0.16427898200004165,
+          "seconds": 0.20338230899960763,
           "result": {
             "B": [
               "ok",
@@ -905,7 +740,37 @@
         {
           "deadlock": false,
           "correct": true,
-          "seconds": 0.21752477300015016,
+          "seconds": 0.21149391699964326,
+          "result": {
+            "B": [
+              "ok",
+              50.0
+            ],
+            "A": [
+              "ok",
+              50.0
+            ]
+          }
+        },
+        {
+          "deadlock": false,
+          "correct": true,
+          "seconds": 0.2176671470006113,
+          "result": {
+            "B": [
+              "ok",
+              50.0
+            ],
+            "A": [
+              "ok",
+              50.0
+            ]
+          }
+        },
+        {
+          "deadlock": false,
+          "correct": true,
+          "seconds": 0.177911562999725,
           "result": {
             "A": [
               "ok",
@@ -920,7 +785,142 @@
         {
           "deadlock": false,
           "correct": true,
-          "seconds": 0.19271045399977993,
+          "seconds": 0.18217777899917564,
+          "result": {
+            "B": [
+              "ok",
+              50.0
+            ],
+            "A": [
+              "ok",
+              50.0
+            ]
+          }
+        },
+        {
+          "deadlock": false,
+          "correct": true,
+          "seconds": 0.2454313620000903,
+          "result": {
+            "B": [
+              "ok",
+              50.0
+            ],
+            "A": [
+              "ok",
+              50.0
+            ]
+          }
+        },
+        {
+          "deadlock": false,
+          "correct": true,
+          "seconds": 0.25635525600046094,
+          "result": {
+            "A": [
+              "ok",
+              50.0
+            ],
+            "B": [
+              "ok",
+              50.0
+            ]
+          }
+        },
+        {
+          "deadlock": false,
+          "correct": true,
+          "seconds": 0.1717574180001975,
+          "result": {
+            "A": [
+              "ok",
+              50.0
+            ],
+            "B": [
+              "ok",
+              50.0
+            ]
+          }
+        },
+        {
+          "deadlock": false,
+          "correct": true,
+          "seconds": 0.21678269399944838,
+          "result": {
+            "B": [
+              "ok",
+              50.0
+            ],
+            "A": [
+              "ok",
+              50.0
+            ]
+          }
+        },
+        {
+          "deadlock": false,
+          "correct": true,
+          "seconds": 0.18656957900020643,
+          "result": {
+            "B": [
+              "ok",
+              50.0
+            ],
+            "A": [
+              "ok",
+              50.0
+            ]
+          }
+        },
+        {
+          "deadlock": false,
+          "correct": true,
+          "seconds": 0.20196962599948165,
+          "result": {
+            "A": [
+              "ok",
+              50.0
+            ],
+            "B": [
+              "ok",
+              50.0
+            ]
+          }
+        },
+        {
+          "deadlock": false,
+          "correct": true,
+          "seconds": 0.19521085300038976,
+          "result": {
+            "A": [
+              "ok",
+              50.0
+            ],
+            "B": [
+              "ok",
+              50.0
+            ]
+          }
+        },
+        {
+          "deadlock": false,
+          "correct": true,
+          "seconds": 0.18967332200008968,
+          "result": {
+            "A": [
+              "ok",
+              50.0
+            ],
+            "B": [
+              "ok",
+              50.0
+            ]
+          }
+        },
+        {
+          "deadlock": false,
+          "correct": true,
+          "seconds": 0.22288077699977293,
           "result": {
             "A": [
               "ok",
@@ -934,5 +934,27 @@
         }
       ]
     }
-  }
+  },
+  "sweep_unscheduled_fixed": [
+    {
+      "ops_per_client": 1,
+      "deadlock_rate": 0.15
+    },
+    {
+      "ops_per_client": 2,
+      "deadlock_rate": 0.15
+    },
+    {
+      "ops_per_client": 4,
+      "deadlock_rate": 0.6
+    },
+    {
+      "ops_per_client": 8,
+      "deadlock_rate": 0.75
+    },
+    {
+      "ops_per_client": 16,
+      "deadlock_rate": 0.85
+    }
+  ]
 }

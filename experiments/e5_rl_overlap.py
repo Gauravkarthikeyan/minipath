@@ -88,7 +88,7 @@ def run(mode: str, iters: int, seed: int, cfg: CP.RLConfig, trace_window: tuple 
     }
     if trace:
         span = trace["t_end"]
-        busy = {w: sum(e[3] - e[2] for e in evs) / span for w, evs in trace["events"].items()}
+        busy = {w: sum(e[3] - e[2] for e in evs if e[1] == "compute") / span for w, evs in trace["events"].items()}
         out["util"] = {
             "sampler": float(np.mean([busy[w] for w in sampler_w])),
             "learner": float(np.mean([busy[w] for w in learner_w])),

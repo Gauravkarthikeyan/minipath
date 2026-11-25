@@ -86,7 +86,7 @@ def fig_dispatch():
 
 def fig_gang():
     d = load("e2_gang")
-    fig, (a, b) = plt.subplots(1, 2, figsize=(11, 3.6), gridspec_kw={"width_ratios": [1.1, 1]})
+    fig, (a, b) = plt.subplots(1, 2, figsize=(11, 3.6), gridspec_kw={"width_ratios": [1.1, 1], "wspace": 0.5})
     names = [
         ("unscheduled_random", "no scheduler,\nrandom send order"),
         ("unscheduled_fixed", "no scheduler,\nfixed send order"),
@@ -159,7 +159,7 @@ def fig_pipeline():
     fig = plt.figure(figsize=(11, 6.2))
     gs = fig.add_gridspec(2, 2, height_ratios=[1.15, 1], hspace=0.55, wspace=0.28)
     a = fig.add_subplot(gs[0, :])
-    workers = sorted(tr, key=int)
+    workers = [str(w) for w in row["stage_workers"]]
     lo, hi = _one_step_window(tr, workers[0])
     colors = {
         "fwd": BLUE,
@@ -169,7 +169,7 @@ def fig_pipeline():
         "adam": AQUA,
         "norm": AQUA,
         "batch": "#b3b3b3",
-        "collective": AQUA,
+        "collective": "#e3e3e3",
     }
     _gantt(a, tr, [int(w) for w in workers], [f"stage {i}" for i in range(len(workers))], colors, lo, hi)
     a.set_xlabel("ms (one training step, measured on the workers)")
@@ -182,8 +182,9 @@ def fig_pipeline():
             Patch(color=ORANGE, label="backward"),
             Patch(color=AQUA, label="grad accumulate / norm / Adam"),
             Patch(color="#b3b3b3", label="batch"),
+            Patch(color="#e3e3e3", label="all-reduce (mostly waiting)"),
         ],
-        ncol=4,
+        ncol=5,
         loc="upper center",
         bbox_to_anchor=(0.5, -0.28),
         fontsize=8,
@@ -227,38 +228,47 @@ def fig_pipeline():
 
 def fig_fault():
     d = load("e4_fault_tolerance")
-    runs = d["runs"]
+    runs, summ = d["runs"], d["summary"]
     fig, (a, b) = plt.subplots(1, 2, figsize=(11, 4.2))
-    series = [
-        ("clean_spmd", "no failure", "#b3b3b3"),
-        ("spmd", "SPMD + checkpoint/restart", BLUE),
-        ("single_controller", "single controller + spare / elastic", ORANGE),
-    ]
-    for key, label, col in series:
-        r = runs[key]
-        t = np.array([x["t"] - r["t0"] for x in r["log"]])
-        s = np.array([x["step"] for x in r["log"]])
-        a.plot(t, s, color=col, lw=LW, label=label)
-        _label_end(a, t[-1], s[-1], f"{t[-1]:.0f}s", color=INK)
-    for key, col in (("spmd", BLUE), ("single_controller", ORANGE)):
-        r = runs[key]
-        for e in r["events"]:
-            if e["kind"] == "kill":
-                a.axvline(e["t"] - r["t0"], color=col, lw=1, ls=":")
     k1 = d["kills"]["first_after_step"]
+    # Left: both runs aligned on the moment the worker is SIGKILLed.
+    for key, label, col in (
+        ("spmd", "SPMD + checkpoint every 50 steps", BLUE),
+        ("single_controller", "single controller + hot spare", ORANGE),
+    ):
+        r = runs[key]
+        t_kill = next(e["t"] for e in r["events"] if e["kind"] == "kill")
+        t = np.array([x["t"] - t_kill for x in r["log"]])
+        st = np.array([x["step"] for x in r["log"]])
+        att = np.array([x.get("attempt", 1) for x in r["log"]])
+        keep = (t > -12) & (t < 40)
+        for i, n in enumerate(sorted(set(att[keep]))):  # one segment per process launch
+            m = keep & (att == n)
+            a.plot(t[m], st[m], "-", color=col, lw=LW, label=label if i == 0 else None)
+    a.axvline(0, color=INK2, lw=1, ls=":")
+    sc, sp = summ["single_controller"], summ["spmd"]
+    t_sc, t_sp = sc["time_to_new_progress_s"][0], sp["time_to_new_progress_s"][0]
     a.annotate(
-        f"worker killed after step {k1}",
-        (next(e["t"] - runs["spmd"]["t0"] for e in runs["spmd"]["events"] if e["kind"] == "kill"), k1),
-        xytext=(-8, 40),
-        textcoords="offset points",
-        ha="right",
+        f"new steps after {t_sc:.1f} s ({sc['steps_redone']} redone)",
+        (t_sc, k1 + 1),
+        xytext=(-9, 150),
+        textcoords="data",
         fontsize=8,
-        color=INK2,
+        color=INK,
         arrowprops={"arrowstyle": "-", "color": INK2, "lw": 0.8},
     )
-    a.set_xlabel("wall-clock seconds")
+    a.annotate(
+        f"restart from step-100 checkpoint:\nnew steps after {t_sp:.1f} s ({sp['steps_redone']} redone)",
+        (t_sp, k1 + 1),
+        xytext=(13, 101),
+        textcoords="data",
+        fontsize=8,
+        color=INK,
+        arrowprops={"arrowstyle": "-", "color": INK2, "lw": 0.8},
+    )
+    a.set_xlabel(f"seconds since a worker was SIGKILLed (after step {k1})")
     a.set_ylabel("training step completed")
-    a.set_title("Progress under failures")
+    a.set_title("Recovering from a lost worker (the runs overlap before the kill)")
     a.legend(fontsize=8, loc="upper left")
 
     for key, label, col, lw in (
@@ -335,6 +345,8 @@ def fig_rl():
         ax.set_xlabel(xl)
         ax.set_ylabel("mean episode return")
         ax.legend(fontsize=8, loc="lower right")
+    b.set_xlim(0, 3)
+    a.set_xlim(0, 60)
     a.set_title("Sample efficiency (lag-1 costs little)")
     b.set_title("Time to solve CartPole")
     _finish(fig, "e5_rl_overlap")
