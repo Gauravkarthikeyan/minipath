@@ -75,9 +75,9 @@ flowchart LR
         W2["worker 2"]
         W3["worker 3"]
     end
-    W0 <-. "tensors, ring all-reduce<br/>(never through the controller)" .-> W1
-    W1 <-.-> W2
-    W2 <-.-> W3
+    W0 -. "tensors + ring all-reduce,<br/>worker to worker" .- W1
+    W1 -.- W2
+    W2 -.- W3
 ```
 
 * **Programs** are plain JAX functions. `cluster.compile(fn)` pickles one,
